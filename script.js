@@ -69,53 +69,58 @@ console.log(myWordTree);
 
 
 const suggestionsBox = document.getElementById("suggestions");
+const stopwatch = document.getElementById("stopwatch"); //new timer
+let typingPause; // pause button
 
 searchBox.addEventListener("input", function(event) {
     const currentText = event.target.value.toLowerCase(); 
     
     //Erase the old words every time you type a new letter
     suggestionsBox.innerHTML = ""; 
+    stopwatch.innerText = ""; // Clear the old time
+    clearTimeout(typingPause);
     
     if (currentText === "") {
         return; // If the box is empty, return nothing
     }
-    
-    let scoreWords=[];
 
-    //If the tree finds NOTHING, check for typos
-
-    for(let fruit of testData){
-        // Count the mistakes between what you typed and the fruit
-        let mistakes = countTypoMistakes(currentText,fruit);
-
-        if(fruit.startsWith(currentText)){
-            mistakes=-1;
+    typingPause = setTimeout(function() {
+        
+        // START THE STOPWATCH
+        const startTime = performance.now(); 
+        
+        let scoredWords = [];
+        for (let fruit of testData) {
+            let mistakes = countTypoMistakes(currentText, fruit);
+            if (fruit.startsWith(currentText)) {
+                mistakes = -1; 
+            }
+            if (mistakes <= 2) {
+                scoredWords.push({ name: fruit, score: mistakes });
+            }
         }
-
-        if(mistakes<=2){
-            scoreWords.push({name:fruit,score:mistakes});
-        }
-
-        scoreWords.sort(function(a,b){return a.score - b.score});
-    }
+        scoredWords.sort(function(a, b) {return a.score - b.score;});
             
-
-    
-    
-    //Paint the new words onto the screen
-    for (let word of scoreWords) {
-        // Create a new little block for each word
-        const wordBlock = document.createElement("div");
-        wordBlock.innerText = word.name;
+        //Paint the new words onto the screen
+        for (let word of scoredWords) {
+            // Create a new little block for each word
+            const wordBlock = document.createElement("div");
+            wordBlock.innerText = word.name;
         
-        // designing to make them look like a list
-        wordBlock.style.padding = "8px";
-        wordBlock.style.borderBottom = "1px solid #eee";
-        wordBlock.style.cursor = "pointer"; // Makes the mouse look like a clicking finger
+            // designing to make them look like a list
+            wordBlock.style.padding = "8px";
+            wordBlock.style.borderBottom = "1px solid #eee";
+            wordBlock.style.cursor = "pointer"; // Makes the mouse look like a clicking finger
         
-        // Drop it into the suggestions box on the screen
-        suggestionsBox.appendChild(wordBlock);
-    }
+            // Drop it into the suggestions box on the screen
+            suggestionsBox.appendChild(wordBlock);
+        }
+        // STOP THE STOPWATCH!
+        const endTime = performance.now(); 
+        const timeTaken = (endTime - startTime).toFixed(2); // Round the number
+        
+        // Paint the time on the screen
+        stopwatch.innerText = "Found in " + timeTaken + " milliseconds!";}, 300);
 });
 
 //count how many typos exist between two words
