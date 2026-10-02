@@ -80,28 +80,33 @@ searchBox.addEventListener("input", function(event) {
         return; // If the box is empty, return nothing
     }
     
-    //find for the matching words
-    let suggestions = myWordTree.find(currentText);
+    let scoreWords=[];
 
     //If the tree finds NOTHING, check for typos
-    if(suggestions.length===0){
-        for(let fruit of testData){
-            // Count the mistakes between what you typed and the fruit
-            let mistakes = countTypoMistakes(currentText,fruit);
 
-            if(mistakes<=2){
-                suggestions.push(fruit);
-            }
+    for(let fruit of testData){
+        // Count the mistakes between what you typed and the fruit
+        let mistakes = countTypoMistakes(currentText,fruit);
+
+        if(fruit.startsWith(currentText)){
+            mistakes=-1;
         }
+
+        if(mistakes<=2){
+            scoreWords.push({name:fruit,score:mistakes});
+        }
+
+        scoreWords.sort(function(a,b){return a.score - b.score});
+    }
             
 
-    }
+    
     
     //Paint the new words onto the screen
-    for (let word of suggestions) {
+    for (let word of scoreWords) {
         // Create a new little block for each word
         const wordBlock = document.createElement("div");
-        wordBlock.innerText = word;
+        wordBlock.innerText = word.name;
         
         // designing to make them look like a list
         wordBlock.style.padding = "8px";
