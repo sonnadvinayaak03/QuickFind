@@ -68,16 +68,33 @@ for(let fruit of  testData){
 console.log(myWordTree);
 
 
-searchBox.addEventListener("input", function(event) {
-    const currentText = event.target.value.toLowerCase(); // keep it lowercase just in case
-    console.clear(); 
-    // If the box is empty, don't search
-    if (currentText === "") {
-        console.log("Waiting for you to type...");
-        return;
-    }
+const suggestionsBox = document.getElementById("suggestions");
 
-    // Ask our magic tree to find words starting with what we typed
+searchBox.addEventListener("input", function(event) {
+    const currentText = event.target.value.toLowerCase(); 
+    
+    //Erase the old words every time you type a new letter
+    suggestionsBox.innerHTML = ""; 
+    
+    if (currentText === "") {
+        return; // If the box is empty, return nothing
+    }
+    
+    //find for the matching words
     const suggestions = myWordTree.find(currentText);
-    console.log("Suggestions found: ", suggestions);
+    
+    //Paint the new words onto the screen
+    for (let word of suggestions) {
+        // Create a new little block for each word
+        const wordBlock = document.createElement("div");
+        wordBlock.innerText = word;
+        
+        // designing to make them look like a list
+        wordBlock.style.padding = "8px";
+        wordBlock.style.borderBottom = "1px solid #eee";
+        wordBlock.style.cursor = "pointer"; // Makes the mouse look like a clicking finger
+        
+        // Drop it into the suggestions box on the screen
+        suggestionsBox.appendChild(wordBlock);
+    }
 });
