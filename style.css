@@ -1,0 +1,21 @@
+body {
+    font-family: Arial, sans-serif;
+    padding: 40px;
+}
+
+#searchBox {
+    padding: 10px;
+    width: 300px;
+    font-size: 16px;
+    border: 2px solid #333;
+    border-radius: 4px;
+}
+
+#suggestions {
+    width: 320px;
+    border: 1px solid #ccc;
+    margin-top: 4px;
+    min-height: 20px;
+    /* We will use this to show and hide the list */
+    display: block; 
+}
