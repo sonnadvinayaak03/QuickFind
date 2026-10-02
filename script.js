@@ -81,7 +81,21 @@ searchBox.addEventListener("input", function(event) {
     }
     
     //find for the matching words
-    const suggestions = myWordTree.find(currentText);
+    let suggestions = myWordTree.find(currentText);
+
+    //If the tree finds NOTHING, check for typos
+    if(suggestions.length===0){
+        for(let fruit of testData){
+            // Count the mistakes between what you typed and the fruit
+            let mistakes = countTypoMistakes(currentText,fruit);
+
+            if(mistakes<=2){
+                suggestions.push(fruit);
+            }
+        }
+            
+
+    }
     
     //Paint the new words onto the screen
     for (let word of suggestions) {
@@ -98,3 +112,36 @@ searchBox.addEventListener("input", function(event) {
         suggestionsBox.appendChild(wordBlock);
     }
 });
+
+//count how many typos exist between two words
+function countTypoMistakes(word1, word2) {
+    const grid = [];
+    
+    for (let i = 0; i <= word1.length; i++) {
+        const row = [i];
+        for (let j = 1; j <= word2.length; j++) {
+            row.push(i === 0 ? j : 0);
+        }
+        grid.push(row);
+    }
+
+    for (let i = 1; i <= word1.length; i++) {
+        for (let j = 1; j <= word2.length; j++) {
+            if (word1[i - 1] === word2[j - 1]) {
+                grid[i][j] = grid[i - 1][j - 1]; // Letters match, no mistake!
+            } else {
+                grid[i][j] = 1 + Math.min(
+                    grid[i - 1][j - 1], // Swap a letter
+                    grid[i][j - 1],     // Add a letter
+                    grid[i - 1][j]      // Remove a letter
+                ); // Find the easiest way to fix the typo
+            }
+        }
+    }
+    
+    return grid[word1.length][word2.length]; // Returns the final number of mistakes
+}
+
+// Let's test it out! 
+console.log("Mistakes between banama and banana:", countTypoMistakes("banama", "banana"));
+console.log("Mistakes between apple and watermelon:", countTypoMistakes("apple", "watermelon"));
