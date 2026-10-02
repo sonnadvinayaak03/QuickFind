@@ -29,6 +29,28 @@ class Trie {
         //the last letter of word
         currentNode.isEndOfWord = true; 
     }
+
+    collectWords(node,currentWord,foundWords){
+        if(node.isEndOfWord){
+            foundWords.push(currentWord);
+        }
+        for(let letter in node.child){
+            this.collectWords(node.child[letter], currentWord + letter, foundWords);
+        }
+    }
+    find(prefix){
+        let currentNode=this.root;
+        //go down the letters used typed
+        for(let letter of prefix){
+            if(!currentNode.child[letter]){
+                return []; //if the branch does not exist , return nothing
+            }
+            currentNode=currentNode.child[letter];
+        }
+        let results=[];
+        this.collectWords(currentNode,prefix,results);
+        return results
+    }
 }
 
 
@@ -44,3 +66,18 @@ for(let fruit of  testData){
 }
 //for testing, print in the console log
 console.log(myWordTree);
+
+
+searchBox.addEventListener("input", function(event) {
+    const currentText = event.target.value.toLowerCase(); // keep it lowercase just in case
+    console.clear(); 
+    // If the box is empty, don't search
+    if (currentText === "") {
+        console.log("Waiting for you to type...");
+        return;
+    }
+
+    // Ask our magic tree to find words starting with what we typed
+    const suggestions = myWordTree.find(currentText);
+    console.log("Suggestions found: ", suggestions);
+});
