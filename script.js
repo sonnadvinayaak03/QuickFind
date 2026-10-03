@@ -55,8 +55,31 @@ class Trie {
 
 
 
-// testing for a small dataset
-const testData = ["apple", "apricot", "banana", "blueberry", "strawberry", "watermelon"];
+// testing for a large dataset
+let testData=[];
+const searchBox= document.getElementById("searchBox");
+searchBox.disabled = true;
+searchBox.placeholder = "Loading dictionary...";
+fetch('https://raw.githubusercontent.com/dwyl/english-words/master/words_alpha.txt')
+    .then(function(response) {
+        return response.text();
+    })
+    .then(function(text) {
+        // making the text into individual words
+        testData = text.split('\n'); 
+
+        for(let word of testData){
+            if(word.length>0){
+                myWordTree.insert(word);
+            }
+        }
+        
+        // Turn the search box back on
+        searchBox.disabled = false;
+        searchBox.placeholder = "Type a word...";
+        console.log("Dictionary loaded and Tree Planted!");
+    });
+
 
 //creating tree
 const myWordTree = new Trie();
@@ -90,13 +113,15 @@ searchBox.addEventListener("input", function(event) {
         const startTime = performance.now(); 
         
         let scoredWords = [];
-        for (let fruit of testData) {
-            let mistakes = countTypoMistakes(currentText, fruit);
-            if (fruit.startsWith(currentText)) {
+        const firstLetter = currentText[0];
+        const wordsToCheck = myWordTree.find(firstLetter);
+        for (let word of wordsToCheck) {
+            let mistakes = countTypoMistakes(currentText, word);
+            if (word.startsWith(currentText)) {
                 mistakes = -1; 
             }
             if (mistakes <= 2) {
-                scoredWords.push({ name: fruit, score: mistakes });
+                scoredWords.push({ name: word, score: mistakes });
             }
         }
         scoredWords.sort(function(a, b) {return a.score - b.score;});
@@ -105,7 +130,8 @@ searchBox.addEventListener("input", function(event) {
         for (let word of scoredWords) {
             // Create a new little block for each word
             const wordBlock = document.createElement("div");
-            wordBlock.innerText = word.name;
+            const glowingWord = highlightLetters(word.name,currentText)
+            wordBlock.innerHTML=glowingWord;
         
             // designing to make them look like a list
             wordBlock.style.padding = "8px";
@@ -152,6 +178,23 @@ function countTypoMistakes(word1, word2) {
     return grid[word1.length][word2.length]; // Returns the final number of mistakes
 }
 
-// Let's test it out! 
-console.log("Mistakes between banama and banana:", countTypoMistakes("banama", "banana"));
-console.log("Mistakes between apple and watermelon:", countTypoMistakes("apple", "watermelon"));
+// Highlighter
+function highlightLetters(word, typedText) {
+    let highlightedWord = "";
+    let typedIndex = 0; // Keep track of which letter we are looking for
+
+    // Look at every single letter in the suggested word
+    for (let i = 0; i < word.length; i++) {
+        // If this letter matches the next letter we typed...
+        if (typedIndex < typedText.length && word[i] === typedText[typedIndex]) {
+            // Put <b> and </b> around it to make it bold
+            highlightedWord += "<b>" + word[i] + "</b>";
+            typedIndex++; // Move on to the next letter we typed
+        } else {
+            // Otherwise, just leave the letter normal
+            highlightedWord += word[i];
+        }
+    }
+    
+    return highlightedWord; // Return the glowing word
+}
